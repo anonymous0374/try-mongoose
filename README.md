@@ -11,7 +11,7 @@ This builds the src directory, output it to dist directory, and watch any
 changes within src and rebuild
 
 3 yarn build
-Like yarn build:w, just don't watch changes
+Like `yarn build:w`, just don't watch changes
 
 ## config.js
 MongoDB configs, mostly configures the database connection

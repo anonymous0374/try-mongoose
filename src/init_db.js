@@ -32,7 +32,7 @@ basicInfo.save((err, basicInfo) => {
         name: 'Jack Sparrow',
         password: 'black pearl',
         abandoned: false,
-        basicInfo: basicInfo._id})
+        basicInfo: basicInfo._id}) // provides basicInfo_id as reference
 
     user.save((err, user) => {
         if (err) {
