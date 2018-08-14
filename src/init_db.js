@@ -14,34 +14,38 @@ mongoose.connect(cnn_url, options,
     () => {console.log(`connection to ${DB_NAME} established`)},
     err => {console.error(`connection to ${DB_NAME} has failed. err: `, err)})
 
-
+const connection = mongoose.connection
 let basicInfo = new BasicInfo({
     gender: true,
     address: 'Jia Xing',
     profession: 'CFA'})
 
 // user depends on basic info, so save basic info first
-basicInfo.save((err, basicInfo) => {
-    if (err) {
-        console.error(err)
-        return
-    }
-
-    let user = new User({
-        _id: new mongoose.Types.ObjectId(),
-        name: 'Jack Sparrow',
-        password: 'black pearl',
-        abandoned: false,
-        basicInfo: basicInfo._id}) // provides basicInfo_id as reference
-
-    user.save((err, user) => {
+connection.on('error', console.error.bind(console, 'connection error!'))
+connection.once('open', () => {
+    basicInfo.save((err, basicInfo) => {
         if (err) {
             console.error(err)
             return
         }
-        mongoose.disconnect()
+
+        let user = new User({
+            _id: new mongoose.Types.ObjectId(),
+            name: 'Jack Sparrow',
+            password: 'black pearl',
+            login: false,
+            abandoned: false,
+            basicInfo: basicInfo._id}) // provides basicInfo_id as reference
+
+        user.save((err, user) => {
+            if (err) {
+                console.error(err)
+                return
+            }
+        })
     })
 })
+
 
 
 

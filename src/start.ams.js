@@ -8,21 +8,21 @@ mongoose.connect(cnn_url, options,
     () => {
         console.log(`connection to ${DB_NAME} established`)
         const app = express()
+        app.use(bodyParser.json())
+        app.use(bodyParser.urlencoded({extended: true}))
         const EXPRESS_PORT = 3001
-        app.get('/ams/user', function (req, res) {
-            const name = req.query.name
-            const param = name ? {name} : {}
-            console.info(`looking for ${name}`)
-
-            User.find(param).exec((err, user) => {
+        app.post('/ams/login', function (req, res) {
+            const {params: {name, password}} = req.body
+            User.findOne({name}).exec((err, user) => {
                 res.setHeader('Content-Type', 'application/json')
-                if (err) {
-                    console.error(err)
-                    return res.end(JSON.stringify([]))
+                if (err || !user) {
+                    return res.end(JSON.stringify({msg: user ? `authentication failed: ${err.toString()}` : 'authentication failed: no such user', code: -1}))
+                }
+                if (password === user.password) {
+                    return res.end(JSON.stringify({user, msg: 'successful', code: 0}))
                 }
 
-                console.info(`${name} found`)
-                return res.end(JSON.stringify(user))
+                return res.end(JSON.stringify({msg: 'authentication failed', code: -1}))
             })
         })
 
@@ -37,7 +37,7 @@ mongoose.connect(cnn_url, options,
             user.save((err, user) => {
                 if (err) {
                     console.error(err)
-                    return res.end(JSON.stringify({error: 'failed to add user'}))
+                    return res.end(JSON.stringify({msg: 'failed to add user', code: -1}))
                 }
                 return res.end(JSON.stringify(user))
             })

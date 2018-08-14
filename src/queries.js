@@ -14,6 +14,7 @@ mongoose.connect(cnn_url, options,
     () => {console.log(`connection to ${DB_NAME} established`)},
     err => {console.error(`connection to ${DB_NAME} has failed. err: `, err)})
 
+const connection = mongoose.connection
 // a simple query
 // User.findOne({name: 'Jack Sparrow'}, (err, user) => {
 //     if (err) {
@@ -25,17 +26,18 @@ mongoose.connect(cnn_url, options,
 //     mongoose.disconnect()
 // })
 
-
 // use population --> so as to perform a "join" query
-User.findOne({name: 'Jack Sparrow'}).
-    populate('basicInfo').
-    exec(function (err, user) {
-        if (err) {
-            console.err(err)
-            return
-        }
+connection.on('error', console.error.bind(console, 'connection error!'))
+connection.once('open', () => {
+    User.findOne({name: 'Jack Sparrow'}).
+        populate('basicInfo').
+        exec(function (err, user) {
+            if (err) {
+                console.err(err)
+                return
+            }
 
-        console.info(user.basicInfo)
-        mongoose.disconnect()
-    })
-
+            console.info(user.basicInfo)
+        })}
+)
+// update the Users collection

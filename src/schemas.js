@@ -14,6 +14,7 @@ const {Schema} = mongoose
 const userSchema = new Schema({
     name: String,
     password: String,
+    login: Boolean,
     abandoned: Boolean,
     basicInfo: {type: Schema.Types.ObjectId, ref: 'BasicInfo'} // reference to basic info
 })
