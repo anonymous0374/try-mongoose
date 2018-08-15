@@ -14,6 +14,7 @@ const {Schema} = mongoose
 const userSchema = new Schema({
     name: String,
     password: String,
+    email: String,
     login: Boolean,
     abandoned: Boolean,
     basicInfo: {type: Schema.Types.ObjectId, ref: 'BasicInfo'} // reference to basic info
@@ -21,7 +22,7 @@ const userSchema = new Schema({
 
 const basicInfoSchema = new Schema({
     gender: Boolean,
-    address: String,
+    city: String,
     profession: String,
     user: {type: Schema.Types.ObjectId, ref: 'User'} // reference to basic user
 })

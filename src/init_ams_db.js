@@ -17,7 +17,7 @@ mongoose.connect(cnn_url, options,
 const connection = mongoose.connection
 let basicInfo = new BasicInfo({
     gender: true,
-    address: 'Jia Xing',
+    city: 'Jia Xing',
     profession: 'CFA'})
 
 // user depends on basic info, so save basic info first
@@ -33,6 +33,7 @@ connection.once('open', () => {
             _id: new mongoose.Types.ObjectId(),
             name: 'Jack Sparrow',
             password: 'black pearl',
+            email: 'better.product.go@gmail.com',
             login: false,
             abandoned: false,
             basicInfo: basicInfo._id}) // provides basicInfo_id as reference
@@ -42,6 +43,7 @@ connection.once('open', () => {
                 console.error(err)
                 return
             }
+            connection.close()
         })
     })
 })
