@@ -3,7 +3,7 @@ import bodyParser from 'body-parser';
 import {
   mongoose, stringifyObjId, PORT, DB_NAME, cnn_url, options,
 } from './config';
-import { BasicInfo, User } from './schemas';
+import { BasicInfo, User, Asset } from './schemas';
 
 const EXPRESS_PORT = 3001;
 
@@ -31,9 +31,7 @@ mongoose.connect(cnn_url, options,
 
     app.post('/ams/user/add', (req, res) => {
       res.setHeader('Content-Type', 'application/json');
-      console.info(req.body);
       const { params: { basicInfo, extraInfo } } = req.body;
-      console.info('basicInfo: ', basicInfo, '\nextraInfo: ', extraInfo);
       const newBasicInfo = new BasicInfo({
         city: extraInfo.city,
         gender: extraInfo.gender,
@@ -61,6 +59,16 @@ mongoose.connect(cnn_url, options,
           return res.end(JSON.stringify({ code: 0, ...basicInfo, ...extraInfo }));
         });
       });
+    });
+
+    app.get('/ams/assets', (req, res) => {
+      res.setHeader('Content-Type', 'application/json');
+      console.info(req.query, req.body);
+      const { name } = req.query;
+      const query = Asset.find({ owner: name });
+      const promise = query.exec();
+      promise.then(data => res.end(JSON.stringify({ code: 0, data })),
+        err => res.end(JSON.stringify({ code: -1, msg: `something went wrong: ${err}` })));
     });
     app.listen(EXPRESS_PORT, (data) => {
       console.info(`express server started at: ${EXPRESS_PORT}`);

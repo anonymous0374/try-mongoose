@@ -6,26 +6,34 @@
 * version: 0.1
 */
 
-import {mongoose} from './config'
+import { mongoose } from './config';
 
-const {Schema} = mongoose
+const { Schema } = mongoose;
 
 // define schemas
 const userSchema = new Schema({
-    name: String,
-    password: String,
-    email: String,
-    login: Boolean,
-    abandoned: Boolean,
-    basicInfo: {type: Schema.Types.ObjectId, ref: 'BasicInfo'} // reference to basic info
-})
+  name: String,
+  password: String,
+  email: String,
+  abandoned: Boolean,
+  basicInfo: { type: Schema.Types.ObjectId, ref: 'BasicInfo' }, // reference to basic info
+});
 
 const basicInfoSchema = new Schema({
-    gender: Boolean,
-    city: String,
-    profession: String,
-    user: {type: Schema.Types.ObjectId, ref: 'User'} // reference to basic user
-})
+  gender: Boolean,
+  city: String,
+  profession: String,
+  user: { type: Schema.Types.ObjectId, ref: 'User' }, // reference to basic user
+});
 
-export const User = mongoose.model('User', userSchema)
-export const BasicInfo = mongoose.model('BasicInfo', basicInfoSchema)
+const assetSchema = new Schema({
+  name: String,
+  location: String,
+  type: String,
+  worth: Number,
+  description: String,
+});
+
+export const User = mongoose.model('User', userSchema);
+export const BasicInfo = mongoose.model('BasicInfo', basicInfoSchema);
+export const Asset = mongoose.model('Asset', assetSchema);

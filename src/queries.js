@@ -6,15 +6,17 @@
 * version: 0.1
 */
 
-import {mongoose, stringifyObjId, PORT, DB_NAME, cnn_url, options} from './config'
-import {BasicInfo, User} from './schemas'
+import {
+  mongoose, stringifyObjId, PORT, DB_NAME, cnn_url, options,
+} from './config';
+import { BasicInfo, User } from './schemas';
 
 // connect to mongodb server
 mongoose.connect(cnn_url, options,
-    () => {console.log(`connection to ${DB_NAME} established`)},
-    err => {console.error(`connection to ${DB_NAME} has failed. err: `, err)})
+  () => { console.log(`connection to ${DB_NAME} established`); },
+  (err) => { console.error(`connection to ${DB_NAME} has failed. err: `, err); });
 
-const connection = mongoose.connection
+const connection = mongoose.connection;
 // a simple query
 // User.findOne({name: 'Jack Sparrow'}, (err, user) => {
 //     if (err) {
@@ -27,17 +29,17 @@ const connection = mongoose.connection
 // })
 
 // use population --> so as to perform a "join" query
-connection.on('error', console.error.bind(console, 'connection error!'))
+connection.on('error', console.error.bind(console, 'connection error!'));
 connection.once('open', () => {
-    User.findOne({name: 'Jack Sparrow'}).
-        populate('basicInfo').
-        exec(function (err, user) {
-            if (err) {
-                console.err(err)
-                return
-            }
+  User.findOne({ name: 'Jack Sparrow' })
+    .populate('basicInfo')
+    .exec((err, user) => {
+      if (err) {
+        console.err(err);
+        return;
+      }
 
-            console.info(user.basicInfo)
-        })}
-)
+      console.info(user.basicInfo);
+    });
+});
 // update the Users collection
