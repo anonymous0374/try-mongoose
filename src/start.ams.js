@@ -45,7 +45,7 @@ mongoose.connect(cnn_url, options,
         }
         const { _id } = rspBasicInfo;
         const newUser = new User({
-          name: basicInfo.userName,
+          name: basicInfo.name,
           email: basicInfo.email,
           password: basicInfo.password,
           basicInfo: _id,
@@ -55,7 +55,6 @@ mongoose.connect(cnn_url, options,
             console.error(err);
             return res.end(JSON.stringify({ msg: 'failed to register user', code: -1 }));
           }
-          console.info(JSON.stringify({ code: 0, ...basicInfo, ...extraInfo }));
           return res.end(JSON.stringify({ code: 0, ...basicInfo, ...extraInfo }));
         });
       });
@@ -63,7 +62,6 @@ mongoose.connect(cnn_url, options,
 
     app.get('/ams/assets', (req, res) => {
       res.setHeader('Content-Type', 'application/json');
-      console.info(req.query, req.body);
       const { name } = req.query;
       const query = Asset.find({ owner: name });
       const promise = query.exec();
