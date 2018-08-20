@@ -27,14 +27,20 @@
     "prettier": "^1.13.7"
   },
   "dependencies": {
+    "bcrypt": "^3.0.0",
     "body-parser": "^1.18.3",
+    "connect-mongo": "^2.0.1",
+    "cookie-parser": "^1.4.3",
     "cookie-session": "^2.0.0-beta.3",
     "cors": "^2.8.1",
     "express": "^4.14.0",
+    "express-session": "^1.15.6",
     "graphql": "^0.8.2",
     "graphql-server-express": "^0.4.3",
     "graphql-tools": "^0.8.3",
     "mongodb": "^2.2.15",
-    "mongoose": "^5.2.7"
+    "mongoose": "^5.2.7",
+    "passport": "^0.4.0",
+    "passport-http": "^0.3.0"
   }
 }

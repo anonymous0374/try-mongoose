@@ -1,6 +1,9 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import cookieSession from 'cookie-session';
+import cookieParser from 'cookie-parser';
+import passport from 'passport';
+import session from 'express-session';
+import url from 'url';
 import {
   mongoose, stringifyObjId, PORT, DB_NAME, cnn_url, options,
 } from './config';
@@ -15,21 +18,27 @@ mongoose.connect(
   () => {
     console.log(`connection to ${DB_NAME} established`);
     const app = express();
-    /*
-    app.use(
-      cookieSession({
-        name: 'session',
-        keys: ['name'],
-        httpOnly: true,
-      }),
-    );
-    */
+    app.use(cookieParser());
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(session({ secret: 'east india company', resave: false, saveUninitialized: false }));
+    app.use(passport.initialize());
+    app.use(passport.session());
+    app.use(auth); // custom middle, used to do authentication depends on session
+
     app.post('/ams/login', (req, res) => {
       const {
         params: { name, password },
       } = req.body;
+
+      User.authenticate(name, password, (err, user) => {
+        if (err) {
+          throw new Error(err.message);
+        }
+
+        res.redirect('/assets');
+      });
+      /*
       User.findOne({ name }).exec((err, user) => {
         res.setHeader('Content-Type', 'application/json');
         if (err || !user) {
@@ -43,15 +52,47 @@ mongoose.connect(
           );
         }
         if (password === user.password) {
+          // console.info(res);
           // req.session.name = user.name;
-          console.info(res);
-          res.setHeader('Set-Cookie', [`name=${user.name}`]);
+          res.setHeader('Set-Cookie', [`name=${user.name};domain=ams.com;path=/`]);
           return res.end(JSON.stringify({ user, msg: 'successful', code: 0 }));
         }
 
         return res.end(JSON.stringify({ msg: 'authentication failed', code: -1 }));
-      });
+
+      }); */
     });
+
+    app.get('/ams/logout', (req, res, next) => {
+      if (req.session) {
+        // if there is session, destroy it
+        req.session.destory((err) => {
+          if (err) {
+            return next(err);
+          }
+          return res.redirect('/');
+        });
+      }
+    });
+
+    // an authentication middleware that checkes EVERY http request
+    function auth(req, res, next) {
+      const urlParts = url.parse(req.url);
+      const { pathname } = urlParts;
+      const whiteList = ['/ams/login'];
+      if (whiteList.includes(pathname)) {
+        // don't block login page
+        return next();
+      }
+      if (req.session && req.session.name) {
+        // otherwise check session existance
+        return next();
+      }
+
+      const err = new Error('You have to login to access this territory.');
+      err.status = 401;
+      return next(err);
+    }
 
     app.post('/ams/user/add', (req, res) => {
       res.setHeader('Content-Type', 'application/json');
@@ -94,15 +135,6 @@ mongoose.connect(
       promise.then(
         data => res.end(JSON.stringify({ code: 0, data })),
         err => res.end(JSON.stringify({ code: -1, msg: `something went wrong: ${err}` })),
-      );
-    });
-
-    app.get('/ams/logout', (req, res) => {
-      res.setHeader('Content-Type', 'application/json');
-      const { name } = req.query;
-      // need to do some session / cookie management here
-      res.end(
-        JSON.stringify({ code: 0, msg: 'sorry, session / cookie management not in place yet' }),
       );
     });
 
