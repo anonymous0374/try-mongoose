@@ -30,6 +30,7 @@ userSchema.pre('save', function (next) {
     next();
   });
 });
+
 const basicInfoSchema = new Schema({
   gender: Boolean,
   city: String,
