@@ -33,7 +33,7 @@ function resolved() {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(session({ secret: 'east india company', resave: false, saveUninitialized: false }));
   app.use(passport.initialize());
-  // app.use(passport.session());
+  app.use(passport.session());
   app.use(auth); // custom middle, used to do authentication depends on session
 
   app.post('/ams/login', (req, res) => {
@@ -76,6 +76,10 @@ function resolved() {
     }
   });
 
+  app.post('/ams/user/get', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+  });
+
   app.post('/ams/user/add', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     const {
@@ -86,7 +90,6 @@ function resolved() {
       gender: extraInfo.gender,
       profession: extraInfo.profession,
     });
-
     newBasicInfo.save((err, rspBasicInfo) => {
       if (err) {
         console.error(err);
@@ -112,6 +115,7 @@ function resolved() {
   app.get('/ams/assets', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     const { name } = req.query;
+    console.info('come to /ams/assets');
     const query = Asset.find({ owner: name });
     const promise = query.exec();
     promise.then(

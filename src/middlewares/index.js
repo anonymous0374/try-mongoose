@@ -6,16 +6,16 @@ export function auth(req, res, next) {
   const { pathname } = urlParts;
   const whiteList = ['/ams/login'];
   if (whiteList.includes(pathname)) {
-    // don't block login page
-    return next();
-  }
-  if (req.session && req.session.name) {
-    // otherwise check session existance
+    // no authentication for login page
     return next();
   }
 
-  console.info(req.session, req.session.name);
+  if (req.session && req.session.id) {
+    // authentication pased
+    return next();
+  }
 
+  // authentication failed
   const err = new Error('You have to login to access this territory.');
   err.status = 401;
   return next(err);
