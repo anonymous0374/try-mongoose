@@ -28,3 +28,9 @@ export const options = {
   socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
   family: 4, // Use IPv4, skip trying IPv6
 };
+
+export const SUCCESS = 0;
+export const ERROR = -1;
+export const NOT_LOGIN = -2;
+export const NO_ACCESS = 401;
+export const NOT_FOUND = -4;

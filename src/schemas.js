@@ -67,12 +67,15 @@ User.authenticate = (name, password, callback) => User.findOne({ name }).exec((e
     return callback(myError);
   }
 
-  bcrypt.compare(password, user.password, (err, result) => {
+  bcrypt.compare(password, user.password, (err, comparedResult) => {
     console.info(password, user.password);
-    if (result) {
+    console.info(`password equals: ${comparedResult}`);
+    if (comparedResult) {
       // assign null to error, assign user as response data
       return callback(null, user);
     }
-    return callback();
+    return callback(
+      new Error('Sorry, your password is invalid. Got questions? Please call XXX XXX'),
+    );
   });
 });

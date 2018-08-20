@@ -1,3 +1,5 @@
+import url from 'url';
+
 // an authentication middleware that checkes EVERY http request
 export function auth(req, res, next) {
   const urlParts = url.parse(req.url);
@@ -11,6 +13,8 @@ export function auth(req, res, next) {
     // otherwise check session existance
     return next();
   }
+
+  console.info(req.session, req.session.name);
 
   const err = new Error('You have to login to access this territory.');
   err.status = 401;

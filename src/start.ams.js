@@ -3,21 +3,29 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import session from 'express-session';
-import url from 'url';
+
 import { auth } from './middlewares';
 import {
-  mongoose, EXPRESS_PORT, DB_NAME, DB_CNN_URL, options,
+  mongoose,
+  EXPRESS_PORT,
+  DB_NAME,
+  DB_CNN_URL,
+  options,
+  SUCCESS,
+  ERROR,
+  NOT_LOGIN,
+  NO_ACCESS,
+  NOT_FOUND,
 } from './config';
 import { BasicInfo, User, Asset } from './schemas';
 
-// connect to mongodb server
+// connection is a promise to connect to mongodb server
 const connection = mongoose.connect(
   DB_CNN_URL,
   options,
 );
-connection.then(resolved, rejected);
 
-function resolved(res) {
+function resolved() {
   console.log(`connection to ${DB_NAME} established`);
   const app = express();
   app.use(cookieParser());
@@ -25,7 +33,7 @@ function resolved(res) {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(session({ secret: 'east india company', resave: false, saveUninitialized: false }));
   app.use(passport.initialize());
-  app.use(passport.session());
+  // app.use(passport.session());
   app.use(auth); // custom middle, used to do authentication depends on session
 
   app.post('/ams/login', (req, res) => {
@@ -33,12 +41,26 @@ function resolved(res) {
       params: { name, password },
     } = req.body;
 
+    res.setHeader('Content-Type', 'application/json');
     User.authenticate(name, password, (err, user) => {
       if (err) {
-        throw new Error(err.message);
+        // throw new Error(err.message);
+        return res.end(
+          JSON.stringify({
+            code: NOT_LOGIN,
+            msg:
+              'Sorry, the password you provided was invalid. Please call our help desk if you need help.',
+          }),
+        );
       }
 
-      res.redirect('/assets');
+      return res.end(
+        JSON.stringify({
+          code: SUCCESS,
+          authenticated: true,
+          user,
+        }),
+      );
     });
   });
 
@@ -106,3 +128,5 @@ function resolved(res) {
 function rejected(err) {
   console.error(`connection to ${DB_NAME} has failed. err: `, err);
 }
+
+connection.then(resolved, rejected);

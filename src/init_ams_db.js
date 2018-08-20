@@ -7,14 +7,21 @@
 */
 
 import {
-  mongoose, stringifyObjId, PORT, DB_NAME, cnn_url, options,
+  mongoose, DB_NAME, DB_CNN_URL, options,
 } from './config';
 import { BasicInfo, User } from './schemas';
 
 // connect to mongodb server
-mongoose.connect(cnn_url, options,
-  () => { console.log(`connection to ${DB_NAME} established`); },
-  (err) => { console.error(`connection to ${DB_NAME} has failed. err: `, err); });
+mongoose.connect(
+  DB_CNN_URL,
+  options,
+  () => {
+    console.log(`connection to ${DB_NAME} established`);
+  },
+  (err) => {
+    console.error(`connection to ${DB_NAME} has failed. err: `, err);
+  },
+);
 
 const connection = mongoose.connection;
 const basicInfo = new BasicInfo({
