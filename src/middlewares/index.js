@@ -1,7 +1,7 @@
 import url from 'url';
 
 // an authentication middleware that checkes EVERY http request
-export function auth(req, res, next) {
+export function checkSession(req, res, next) {
   const urlParts = url.parse(req.url);
   const { pathname } = urlParts;
   const whiteList = ['/ams/login'];
