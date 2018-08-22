@@ -12,8 +12,11 @@ export function checkSession(req, res, next) {
 
   if (req.session && req.session.id) {
     // authentication pased
+    console.info(`session valid`)
     return next();
   }
+
+  console.info(`session invalid`)
 
   // authentication failed
   const err = new Error('You have to login to access this territory.');

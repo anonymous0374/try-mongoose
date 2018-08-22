@@ -94,19 +94,19 @@ function resolved() {
     const queryPromise = User.findOne({ name }).exec();
     queryPromise.then(
       (user) => {
-        const {name, email, abandoned} = user
-        return res.end(JSON.stringify({ code: 0, name, email, abandoned, authenticated: true }));
+        const { name, email, abandoned } = user;
+        return res.end(JSON.stringify({
+          code: 0, name, email, abandoned, authenticated: true,
+        }));
       },
-      (err) => {
-        return res.end(
-          JSON.stringify({
-            code: 0,
-            authenticated: false,
-            name: 'Guest',
-            msg: err,
-          }),
-        );
-      },
+      err => res.end(
+        JSON.stringify({
+          code: 0,
+          authenticated: false,
+          name: 'Guest',
+          msg: err,
+        }),
+      ),
     );
   });
 
