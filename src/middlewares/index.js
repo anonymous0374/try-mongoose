@@ -1,25 +1,33 @@
 import url from 'url';
+import { ACCESS_WHITE_LIST } from '../config';
 
-// an authentication middleware that checkes EVERY http request
-export function checkSession(req, res, next) {
+export function sessionInspector(req, res, next) {
   const urlParts = url.parse(req.url);
   const { pathname } = urlParts;
-  const whiteList = ['/ams/login'];
-  if (whiteList.includes(pathname)) {
-    // no authentication for login page
+
+  if (ACCESS_WHITE_LIST.includes(pathname)) {
+    // does not need a session
     return next();
   }
 
   if (req.session && req.session.id) {
-    // authentication pased
-    console.info(`session valid`)
-    return next();
+    // session established
+    const { user } = req.session;
+    if (user && user !== 'Guest') {
+      return next();
+    }
   }
 
-  console.info(`session invalid`)
-
-  // authentication failed
+  // need a session, but none was found
   const err = new Error('You have to login to access this territory.');
   err.status = 401;
-  return next(err);
+  return res.end(
+    JSON.stringify({
+      code: 401,
+      msg: 'You have to login to access this territory.',
+      authenticated: false,
+    }),
+  );
 }
+
+export function placeHolder() {}

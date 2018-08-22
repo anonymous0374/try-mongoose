@@ -1,10 +1,9 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import cookieParser from 'cookie-parser';
-import passport from 'passport';
+// import passport from 'passport';
 import session from 'express-session';
 import ConnectMongoSession from 'connect-mongo';
-import { checkSession } from './middlewares';
+import { sessionInspector } from './middlewares';
 import {
   mongoose,
   EXPRESS_PORT,
@@ -24,12 +23,12 @@ const connection = mongoose.connect(
   DB_CNN_URL,
   options,
 );
-const MongoStore = ConnectMongoSession(session);
+// const MongoStore = ConnectMongoSession(session);
 
 function resolved() {
   console.log(`connection to ${DB_NAME} established`);
   const app = express();
-  app.use(cookieParser());
+
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(
@@ -37,12 +36,16 @@ function resolved() {
       secret: 'east india company',
       resave: false,
       saveUninitialized: false,
+      cookie: {
+        httpOnly: false,
+        path: '/',
+      },
       // store: new MongoStore()
     }),
   );
-  app.use(passport.initialize());
-  app.use(passport.session());
-  app.use(checkSession); // custom middle, used to do authentication depends on session
+  // app.use(passport.initialize());
+  // app.use(passport.session());
+  app.use(sessionInspector); // session inspector
 
   app.post('/ams/login', (req, res) => {
     const {
@@ -62,7 +65,7 @@ function resolved() {
         );
       }
 
-      res.setHeader('Set-Cookie', [`name=${name};domain=ams.com;path=/`]);
+      req.session.user = name; // add 'user' property to session
       return res.end(
         JSON.stringify({
           code: SUCCESS,
@@ -88,25 +91,43 @@ function resolved() {
   app.post('/ams/user/get', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     // get name from request cookie
-    const {
-      cookies: { name },
-    } = req;
-    const queryPromise = User.findOne({ name }).exec();
-    queryPromise.then(
-      (user) => {
-        const { name, email, abandoned } = user;
-        return res.end(JSON.stringify({
-          code: 0, name, email, abandoned, authenticated: true,
-        }));
-      },
-      err => res.end(
-        JSON.stringify({
-          code: 0,
-          authenticated: false,
-          name: 'Guest',
-          msg: err,
-        }),
-      ),
+    if (req.session) {
+      const {
+        session: { user: name },
+      } = req;
+
+      if (name && name !== 'Guest') {
+        return User.findOne({ name }).exec((err, user) => {
+          if (err) {
+            return res.end(
+              JSON.stringify({
+                code: 0,
+                authenticated: false,
+                name: 'Guest',
+                msg: `Sorry, we can't find '${name}' in our system: `,
+              }),
+            );
+          }
+          const { email, abandoned } = user;
+          return res.end(
+            JSON.stringify({
+              code: 0,
+              name,
+              email,
+              abandoned,
+              authenticated: true,
+            }),
+          );
+        });
+      }
+    }
+
+    return res.end(
+      JSON.stringify({
+        code: 0,
+        authenticated: false,
+        name: 'Guest',
+      }),
     );
   });
 
