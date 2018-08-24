@@ -2,7 +2,8 @@ import express from 'express';
 import bodyParser from 'body-parser';
 // import passport from 'passport';
 import session from 'express-session';
-import ConnectMongoSession from 'connect-mongo';
+import ConnectMongoSession from 'connect-mongo'; // use mongodb to store session data
+import escape from 'escape-html';
 import { sessionInspector } from './middlewares';
 import {
   mongoose,
@@ -60,7 +61,7 @@ function resolved() {
           JSON.stringify({
             code: NOT_LOGIN,
             msg:
-              'Sorry, the password you provided was invalid. Please call our help desk if you need help.',
+              'Sorry, the password you provided was invalid. <br />Please call our help desk if you need help.',
           }),
         );
       }
@@ -76,16 +77,22 @@ function resolved() {
     });
   });
 
-  app.get('/ams/logout', (req, res, next) => {
+  app.post('/ams/logout', (req, res, next) => {
     if (req.session) {
       // if there is session, destroy it
-      req.session.destory((err) => {
+      return req.session.destroy((err) => {
         if (err) {
           return next(err);
         }
-        return res.redirect('/');
+        return res.end(
+          JSON.stringify({ code: 0, auth: { authenticate: false, name: 'Guest' }, user: null }),
+        );
       });
     }
+
+    return res.end(
+      JSON.stringify({ code: 0, auth: { authenticate: false, name: 'Guest' }, user: null }),
+    );
   });
 
   app.post('/ams/user/get', (req, res) => {

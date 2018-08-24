@@ -4,7 +4,6 @@ import { ACCESS_WHITE_LIST } from '../config';
 export function sessionInspector(req, res, next) {
   const urlParts = url.parse(req.url);
   const { pathname } = urlParts;
-
   if (ACCESS_WHITE_LIST.includes(pathname)) {
     // does not need a session
     return next();
@@ -12,6 +11,7 @@ export function sessionInspector(req, res, next) {
 
   if (req.session && req.session.id) {
     // session established
+    console.info('session id: ', req.sessionID);
     const { user } = req.session;
     if (user && user !== 'Guest') {
       return next();

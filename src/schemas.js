@@ -57,6 +57,7 @@ export const User = mongoose.model('User', userSchema);
 export const BasicInfo = mongoose.model('BasicInfo', basicInfoSchema);
 export const Asset = mongoose.model('Asset', assetSchema);
 
+// define authenticate like a middleware
 User.authenticate = (name, password, callback) => User.findOne({ name }).exec((err, user) => {
   if (err) {
     return callback(err);
@@ -68,8 +69,6 @@ User.authenticate = (name, password, callback) => User.findOne({ name }).exec((e
   }
 
   bcrypt.compare(password, user.password, (err, comparedResult) => {
-    console.info(password, user.password);
-    console.info(`password equals: ${comparedResult}`);
     if (comparedResult) {
       // assign null to error, assign user as response data
       return callback(null, user);
