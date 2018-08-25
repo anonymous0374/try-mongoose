@@ -181,6 +181,35 @@ function resolved() {
     );
   });
 
+  // cashflow
+  app.post('/ams/cashflow/add', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    const {
+      body: { params },
+    } = req;
+    if (!params || Object.keys(params).length === 0) {
+      throw new Error('User need to input data to log a Cashflow event.');
+    }
+    const {
+      amount, paymentMethod, direction, dueDate, remark,
+    } = params;
+    const owner = req.session.user;
+    const dateTime = new Date();
+
+    return res.end(
+      JSON.stringify({
+        code: 0,
+        amount,
+        paymentMethod,
+        direction,
+        dueDate,
+        remark,
+        owner,
+        dateTime,
+      }),
+    );
+  });
+
   app.listen(EXPRESS_PORT, () => {
     console.info(`express server started at: ${EXPRESS_PORT}`);
   });
