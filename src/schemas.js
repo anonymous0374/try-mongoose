@@ -4,6 +4,8 @@
 * author: j-sparrow
 * inital date: 2018-08-08
 * version: 0.1
+* Add validations to schema
+* version: 0.2
 */
 
 import bcrypt from 'bcrypt';
@@ -13,8 +15,14 @@ const { Schema } = mongoose;
 
 // define schemas
 const userSchema = new Schema({
-  name: String,
-  password: String,
+  name: {
+    type: String,
+    required: [true, 'must proivde uname'],
+  },
+  password: {
+    type: String,
+    required: [true, 'must provide pasdsword'],
+  },
   email: String,
   abandoned: Boolean,
   basicInfo: { type: Schema.Types.ObjectId, ref: 'BasicInfo' }, // reference to basic info
@@ -32,7 +40,10 @@ userSchema.pre('save', function (next) {
 });
 
 const basicInfoSchema = new Schema({
-  gender: Boolean,
+  gender: {
+    type: String,
+    enum: ['Male', 'Female', 'Keep it Private'],
+  },
   city: String,
   profession: String,
   user: { type: Schema.Types.ObjectId, ref: 'User' }, // reference to basic user
@@ -47,6 +58,32 @@ const assetSchema = new Schema({
   description: String,
 });
 
+const flowEventSchema = new Schema({
+  owner: {
+    requred: [true, 'must provide owner'],
+    type: String,
+  },
+  amount: {
+    required: [true, 'must provide amount'],
+    type: Number,
+  },
+  paymentMethod: {
+    type: String,
+    enum: ['cash', "yu'er bao", 'ant credit pay', 'credit card'],
+  },
+  direction: {
+    required: [true, 'must provide flowDirection'],
+    type: String,
+    enum: ['flow in', 'flow out'],
+  },
+  dueDate: Date, // when will this payment dues
+  dateTime: {
+    required: [true, 'must provide dateTime'],
+    type: Date,
+  }, // when this flow is created
+  remark: String,
+});
+
 // add static method to the schema, so that the modal
 // can call it directly
 userSchema.static('sayHello', () => {
@@ -56,6 +93,7 @@ userSchema.static('sayHello', () => {
 export const User = mongoose.model('User', userSchema);
 export const BasicInfo = mongoose.model('BasicInfo', basicInfoSchema);
 export const Asset = mongoose.model('Asset', assetSchema);
+export const FlowEvent = mongoose.model('DailyFlow', flowEventSchema);
 
 // define authenticate like a middleware
 User.authenticate = (name, password, callback) => User.findOne({ name }).exec((err, user) => {
