@@ -237,7 +237,7 @@ function resolved() {
     const {
       session: { user: owner },
     } = req;
-    FlowEvent.query({ owner }, (err, data) => {
+    FlowEvent.find({ owner }, (err, data) => {
       if (err) {
         return res.end(
           JSON.stringify({

@@ -74,7 +74,7 @@ const flowEventSchema = new Schema({
   direction: {
     required: [true, 'must provide flowDirection'],
     type: String,
-    enum: ['flow in', 'flow out'],
+    enum: ['out', 'in'],
   },
   dueDate: Date, // when will this payment dues
   dateTime: {
