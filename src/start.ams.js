@@ -17,7 +17,9 @@ import {
   NO_ACCESS,
   NOT_FOUND,
 } from './config';
-import { BasicInfo, User, Asset } from './schemas';
+import {
+  BasicInfo, User, Asset, FlowEvent,
+} from './schemas';
 
 // connection is a promise to connect to mongodb server
 const connection = mongoose.connect(
@@ -196,18 +198,62 @@ function resolved() {
     const owner = req.session.user;
     const dateTime = new Date();
 
-    return res.end(
-      JSON.stringify({
-        code: 0,
-        amount,
-        paymentMethod,
-        direction,
-        dueDate,
-        remark,
-        owner,
-        dateTime,
-      }),
-    );
+    const flowEvent = new FlowEvent({
+      owner,
+      amount,
+      paymentMethod,
+      direction,
+      dueDate,
+      remark,
+      dateTime,
+    });
+
+    flowEvent.save((err, data) => {
+      if (err) {
+        return res.end(
+          JSON.stringify({
+            code: -1,
+            msg: err.toString(),
+          }),
+        );
+      }
+      return res.end(
+        JSON.stringify({
+          code: 0,
+          amount,
+          paymentMethod,
+          direction,
+          dueDate,
+          remark,
+          owner,
+          dateTime,
+        }),
+      );
+    });
+  });
+
+  app.get('/ams/cashflow', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    const {
+      session: { user: owner },
+    } = req;
+    FlowEvent.query({ owner }, (err, data) => {
+      if (err) {
+        return res.end(
+          JSON.stringify({
+            code: -1,
+            msg: err.toString(),
+          }),
+        );
+      }
+
+      return res.end(
+        JSON.stringify({
+          code: 0,
+          ...data,
+        }),
+      );
+    });
   });
 
   app.listen(EXPRESS_PORT, () => {
