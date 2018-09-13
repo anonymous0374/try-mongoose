@@ -3,7 +3,6 @@ import bodyParser from 'body-parser';
 // import passport from 'passport';
 import session from 'express-session';
 import ConnectMongoSession from 'connect-mongo'; // use mongodb to store session data
-import escape from 'escape-html';
 import { sessionInspector, historyManager } from './middlewares';
 import {
   mongoose,
@@ -75,6 +74,7 @@ function resolved() {
           code: SUCCESS,
           authenticated: true,
           user,
+          history: req.session.history,
         }),
       );
     });
@@ -103,7 +103,7 @@ function resolved() {
     // get name from request cookie
     if (req.session) {
       const {
-        session: { user: name },
+        session: { user: name, history },
       } = req;
 
       if (name && name !== 'Guest') {
@@ -126,6 +126,7 @@ function resolved() {
               email,
               abandoned,
               authenticated: true,
+              history,
             }),
           );
         });
@@ -175,11 +176,11 @@ function resolved() {
 
   app.get('/ams/assets', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
-    const { name } = req.query;
+    const { query: { name }, session: { history } } = req;
     const query = Asset.find({ owner: name });
     const promise = query.exec();
     promise.then(
-      data => res.end(JSON.stringify({ code: 0, data })),
+      data => res.end(JSON.stringify({ code: 0, data, history })),
       err => res.end(JSON.stringify({ code: -1, msg: `something went wrong: ${err}` })),
     );
   });
@@ -189,6 +190,7 @@ function resolved() {
     res.setHeader('Content-Type', 'application/json');
     const {
       body: { params },
+      session: { history },
     } = req;
     if (!params || Object.keys(params).length === 0) {
       throw new Error('User need to input data to log a Cashflow event.');
@@ -228,6 +230,7 @@ function resolved() {
           remark,
           owner,
           dateTime,
+          history,
         }),
       );
     });
@@ -236,7 +239,7 @@ function resolved() {
   app.get('/ams/cashflow', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     const {
-      session: { user: owner },
+      session: { user: owner, history },
     } = req;
     FlowEvent.query({ owner }, (err, data) => {
       if (err) {
@@ -252,6 +255,7 @@ function resolved() {
         JSON.stringify({
           code: 0,
           ...data,
+          history,
         }),
       );
     });
