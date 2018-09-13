@@ -30,35 +30,4 @@ export function sessionInspector(req, res, next) {
   );
 }
 
-/**
-* mantain 10 latest visited url location in session
-*/
-export function historyManager(req, res, next) {
-  const MAX_LEN = 10;
-  const DOMAIN_NAME = req.hostname;
-  const PATH = req.path;
-  // const LOCATION = `${req.protocol}://${req.hostname}${req.path}`;
-  const LOCATION = req.get('referer');
-  const { session } = req;
-  if (!session) {
-    return next();
-  }
-
-  console.info(`path: ${PATH}, location: ${LOCATION}`);
-
-  if (!LOCATION.endsWith('/login')) {
-    const { history } = req.session;
-    const hisArr = history ? JSON.parse(history) : [];
-    const len = hisArr.length;
-
-    len === 10 ? hisArr.pop() : '';
-    hisArr.push(LOCATION);
-
-    console.info('hisArr: ', hisArr);
-    req.session.history = JSON.stringify(hisArr);
-
-    console.info('req.session: ', session);
-  }
-
-  return next();
-}
+export function placeHolder() {}

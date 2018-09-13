@@ -3,7 +3,8 @@ import bodyParser from 'body-parser';
 // import passport from 'passport';
 import session from 'express-session';
 import ConnectMongoSession from 'connect-mongo'; // use mongodb to store session data
-import { sessionInspector, historyManager } from './middlewares';
+import escape from 'escape-html';
+import { sessionInspector } from './middlewares';
 import {
   mongoose,
   EXPRESS_PORT,
@@ -48,7 +49,6 @@ function resolved() {
   // app.use(passport.initialize());
   // app.use(passport.session());
   app.use(sessionInspector); // session inspector
-  app.use(historyManager);
 
   app.post('/ams/login', (req, res) => {
     const {
